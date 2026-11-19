@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>景美國小一年級數學領域第一單元學習單 — 列印專區</title>
+  <style>
+    @font-face {
+      font-family: 'BpmfIansui';
+      src: url('fonts/BpmfIansui.woff2') format('woff2'),
+           url('fonts/BpmfIansui.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'BpmfIansui', "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      padding: 16px;
+    }
+
+    /* 頂部非列印控制列 */
+    .no-print-bar {
+      max-width: 900px;
+      margin: 0 auto 16px auto;
+      background: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: bold;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: #0284c7; color: #ffffff; }
+    .btn-primary:hover { background: #0369a1; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-accent { background: #f97316; color: #ffffff; }
+    .btn-accent:hover { background: #ea580c; }
+
+    /* A4 紙張容器 */
+    .sheet-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .a4-page {
+      background: #ffffff;
+      width: 100%;
+      height: 1080px; /* 鎖定剛好 1 頁 A4 */
+      max-height: 1080px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+    }
+
+    /* 頁首資訊 */
+    .sheet-header {
+      border-bottom: 1.5px solid #0f172a;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .sheet-title {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .sheet-subtitle {
+      font-size: 16px;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .student-info-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      padding: 0 8px;
+      color: #1e293b;
+    }
+
+    .underline-field {
+      display: inline-block;
+      min-width: 50px;
+      border-bottom: 1.5px solid #1e293b;
+      margin: 0 3px;
+      text-align: center;
+    }
+    .underline-field.name { min-width: 120px; }
+
+    /* 表格樣式 */
+    .worksheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      flex: 1;
+    }
+
+    .worksheet-table th,
+    .worksheet-table td {
+      border: 1.2px solid #94a3b8;
+      padding: 2px 4px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .worksheet-table th {
+      background: #f8fafc;
+      font-size: 16px;
+      padding: 4px;
+    }
+
+    .char-cell {
+      font-size: 20px;
+      font-weight: bold;
+      width: 55px;
+      background: #f8fafc;
+    }
+
+    .bpmf-sub {
+      display: block;
+      font-size: 13px;
+      color: #64748b;
+      font-weight: normal;
+    }
+
+    /* 示範格放大為 1.5 倍 */
+    .tian-grid-demo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    /* 描紅與自寫格 */
+    .tian-grid-normal {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    .grid-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 數字接龍題型版面（每頁剛好 10 題） */
+    .solitaire-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .solitaire-item {
+      border: 1.2px dashed #94a3b8;
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      font-size: 19px;
+      background: #ffffff;
+    }
+
+    .q-number {
+      font-weight: bold;
+      margin-right: 12px;
+      color: #0284c7;
+      min-width: 36px;
+    }
+
+    .sequence-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seq-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: #e0f2fe;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      border: 1.2px solid #7dd3fc;
+    }
+
+    .seq-blank {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: #fff;
+      border: 2px dashed #f97316;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f97316;
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .seq-arrow {
+      color: #94a3b8;
+      font-size: 16px;
+    }
+
+    /* 列印專屬 CSS 樣式：剛好印在 A4 */
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .no-print-bar {
+        display: none !important;
+      }
+      .sheet-container {
+        max-width: 100%;
+      }
+      .a4-page {
+        box-shadow: none;
+        margin: 0;
+        padding: 10mm 12mm;
+        width: 100%;
+        height: 297mm;
+        max-height: 297mm;
+        page-break-after: always;
+        break-after: page;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      .page-break {
+        page-break-before: always;
+        break-before: page;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 非列印工具列 -->
+  <div class="no-print-bar">
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ 列印學習單 (Print)</button>
+      <button class="btn btn-secondary" onclick="showSheet('digits')">🔢 數字 0–10 筆順單 (1張)</button>
+      <button class="btn btn-secondary" onclick="showSheet('hanzi')">✍️ 國字 一～十 筆順單 (1張)</button>
+      <button class="btn btn-secondary" onclick="showSheet('solitaire')">🧩 數字接龍學習單 (題目1張/答案1張)</button>
+      <button class="btn btn-accent" id="btn-regen-solitaire" onclick="regenerateSolitaire()" style="display:none;">🎲 重新產生 10 題</button>
+    </div>
+    <div>
+      <a href="index.html" class="btn btn-secondary" style="text-decoration:none;">⬅️ 返回主程式</a>
+    </div>
+  </div>
+
+  <div class="sheet-container">
+
+    <!-- ============================================== -->
+    <!-- 學習單 1：數字 0–10 筆順練習單（剛好 1 頁 A4） -->
+    <!-- ============================================== -->
+    <div id="sheet-digits" class="a4-page">
+      <div class="sheet-header">
+        <div class="sheet-title">景美國小一年級數學領域第一單元學習單</div>
+        <div class="sheet-subtitle">【十以內阿拉伯數字筆順與書寫練習】</div>
+        <div class="student-info-bar">
+          <span class="info-item">一年 <span class="underline-field"></span> 班</span>
+          <span class="info-item"><span class="underline-field"></span> 號</span>
+          <span class="info-item">姓名：<span class="underline-field name"></span></span>
+          <span class="info-item">家長簽名：<span class="underline-field name"></span></span>
+        </div>
+      </div>
+
+      <table class="worksheet-table">
+        <thead>
+          <tr>
+            <th style="width: 55px;">數字</th>
+            <th style="width: 130px;">筆順示範 (1.5倍)</th>
+            <th style="width: 80px;">描紅一</th>
+            <th style="width: 80px;">描紅二</th>
+            <th style="width: 80px;">描紅三</th>
+            <th style="width: 80px;">自寫一</th>
+            <th style="width: 80px;">自寫二</th>
+            <th style="width: 80px;">自寫三</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-digits">
+          <!-- 由 JS 自動填入 0-10 -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 學習單 2：國字 一～十 筆順練習單（剛好 1 頁 A4） -->
+    <!-- ============================================== -->
+    <div id="sheet-hanzi" class="a4-page" style="display: none;">
+      <div class="sheet-header">
+        <div class="sheet-title">景美國小一年級數學領域第一單元學習單</div>
+        <div class="sheet-subtitle">【國字一～十筆順與書寫練習（教育部標準字體）】</div>
+        <div class="student-info-bar">
+          <span class="info-item">一年 <span class="underline-field"></span> 班</span>
+          <span class="info-item"><span class="underline-field"></span> 號</span>
+          <span class="info-item">姓名：<span class="underline-field name"></span></span>
+          <span class="info-item">家長簽名：<span class="underline-field name"></span></span>
+        </div>
+      </div>
+
+      <table class="worksheet-table">
+        <thead>
+          <tr>
+            <th style="width: 60px;">國字</th>
+            <th style="width: 130px;">筆順示範 (1.5倍)</th>
+            <th style="width: 80px;">描紅一</th>
+            <th style="width: 80px;">描紅二</th>
+            <th style="width: 80px;">描紅三</th>
+            <th style="width: 80px;">自寫一</th>
+            <th style="width: 80px;">自寫二</th>
+            <th style="width: 80px;">自寫三</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-hanzi">
+          <!-- 由 JS 自動填入 一～十 -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 學習單 3：數字接龍練習單（題目 1 頁，答案 1 頁） -->
+    <!-- ============================================== -->
+    <div id="sheet-solitaire" style="display: none;">
+      <!-- 第 1 頁：題目頁（剛好 1 頁 A4） -->
+      <div class="a4-page">
+        <div class="sheet-header">
+          <div class="sheet-title">景美國小一年級數學領域第一單元學習單</div>
+          <div class="sheet-subtitle">【數字接龍：找一找空格裡要填入什麼數字呢？】</div>
+          <div class="student-info-bar">
+            <span class="info-item">一年 <span class="underline-field"></span> 班</span>
+            <span class="info-item"><span class="underline-field"></span> 號</span>
+            <span class="info-item">姓名：<span class="underline-field name"></span></span>
+            <span class="info-item">得分：<span class="underline-field"></span></span>
+          </div>
+        </div>
+
+        <div class="solitaire-list" id="solitaire-questions-container">
+          <!-- 題目 1~10 -->
+        </div>
+      </div>
+
+      <!-- 第 2 頁：解答頁（剛好 1 頁 A4） -->
+      <div class="a4-page page-break">
+        <div class="sheet-header">
+          <div class="sheet-title">景美國小一年級數學領域第一單元學習單（解答卷）</div>
+          <div class="sheet-subtitle">【數字接龍參考答案與數線解析】</div>
+        </div>
+
+        <div class="solitaire-list" id="solitaire-answers-container">
+          <!-- 答案 1~10 -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 載入中線字形資料與引擎 -->
+  <script src="data/glyphs-digits.js"></script>
+  <script src="data/glyphs-hanzi.js"></script>
+  <script src="engine/stroke-engine.js"></script>
+
+  <script>
+    'use strict';
+
+    // 示範格筆順色彩：第 1 筆紅、第 2 筆藍、第 3 筆綠、第 4 筆紫、第 5 筆橘
+    const STROKE_COLORS = ['#dc2626', '#2563eb', '#16a34a', '#9333ea', '#ea580c'];
+    const NUM_ICONS = ['①', '②', '③', '④', '⑤'];
+
+    /**
+     * 建立田字格 SVG（一律使用平滑後的點列）
+     */
+    function createTianGridSVG(glyph, options = {}) {
+      const showDemo = options.showDemo || false;
+      const showGhost = options.showGhost || false;
+
+      let inner = `
+        <rect width="100" height="100" fill="#ffffff" />
+        <rect x="1.5" y="1.5" width="97" height="97" fill="none" stroke="#94a3b8" stroke-width="2" />
+        <line x1="50" y1="0" x2="50" y2="100" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,4" />
+        <line x1="0" y1="50" x2="100" y2="50" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,4" />
+      `;
+
+      if (glyph && glyph.strokes) {
+        const strokeW = glyph.strokeWidth || (glyph.type === 'digit' ? 9 : 7);
+
+        glyph.strokes.forEach((stroke, idx) => {
+          // 先平滑補點
+          const smPts = window.StrokeEngine.StrokeMath.smoothPath(stroke.points, 8);
+          const ptsStr = smPts.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+          const color = showGhost ? '#cbd5e1' : (showDemo ? STROKE_COLORS[idx % STROKE_COLORS.length] : '#cbd5e1');
+
+          inner += `
+            <polyline points="${ptsStr}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="round" stroke-linejoin="round" />
+          `;
+
+          // 示範格：繪製筆次編號、起點綠點與箭頭
+          if (showDemo) {
+            // 本筆線條已畫出，稍後統一繪製導引圖形
+          }
+        });
+
+        // 示範格：使用防重疊演算法統一繪製起點綠點、實心方向箭頭與圓圈編號
+        if (showDemo) {
+          const guides = window.StrokeEngine.StrokeMath.computeStrokeGuides(glyph);
+          guides.forEach(g => {
+            // 1. 起點綠點
+            inner += `
+              <circle cx="${g.p0[0].toFixed(1)}" cy="${g.p0[1].toFixed(1)}" r="3.6" fill="#22c55e" />
+              <circle cx="${g.p0[0].toFixed(1)}" cy="${g.p0[1].toFixed(1)}" r="1.5" fill="#ffffff" />
+            `;
+
+            // 2. 實心方向箭頭（箭身長 12、線寬 2.5、三角形邊長 5，偏移起點外側 7 單位）
+            const aStart = g.arrow.start;
+            const aBase = g.arrow.base;
+            const aTip = g.arrow.tip;
+            const c1 = g.arrow.corners[0];
+            const c2 = g.arrow.corners[1];
+
+            inner += `
+              <line x1="${aStart[0].toFixed(1)}" y1="${aStart[1].toFixed(1)}" x2="${aBase[0].toFixed(1)}" y2="${aBase[1].toFixed(1)}" stroke="${g.color}" stroke-width="2.5" stroke-linecap="round" />
+              <polygon points="
+                ${aTip[0].toFixed(1)},${aTip[1].toFixed(1)}
+                ${c1[0].toFixed(1)},${c1[1].toFixed(1)}
+                ${c2[0].toFixed(1)},${c2[1].toFixed(1)}
+              " fill="${g.color}" />
+            `;
+
+            // 3. 圓圈編號（半徑 5 單位，數字字級 7 單位，白底彩色外框，避開重疊與箭頭）
+            const nx = g.numPos[0].toFixed(1);
+            const ny = g.numPos[1].toFixed(1);
+            inner += `
+              <circle cx="${nx}" cy="${ny}" r="5.0" fill="#ffffff" stroke="${g.color}" stroke-width="1.3" />
+              <text x="${nx}" y="${ny}" font-size="7" font-weight="bold" fill="${g.color}" text-anchor="middle" dominant-baseline="central" font-family="'Segoe UI', Roboto, sans-serif">${g.strokeIndex + 1}</text>
+            `;
+          });
+        }
+      }
+
+      return `<svg viewBox="0 0 100 100" class="grid-svg">${inner}</svg>`;
+    }
+
+    function buildDigitsTable() {
+      const tbody = document.getElementById('tbody-digits');
+      tbody.innerHTML = '';
+
+      const keys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+      for (const k of keys) {
+        const glyph = window.GLYPHS_DIGITS[k];
+        if (!glyph) continue;
+
+        const tr = document.createElement('tr');
+
+        // 數字
+        const tdChar = document.createElement('td');
+        tdChar.className = 'char-cell';
+        tdChar.innerHTML = `<div>${k}</div><span class="bpmf-sub">${glyph.counterpart}</span>`;
+        tr.appendChild(tdChar);
+
+        // 示範格 (1.5倍)
+        const tdDemo = document.createElement('td');
+        tdDemo.innerHTML = `<div class="tian-grid-demo">${createTianGridSVG(glyph, { showDemo: true })}</div>`;
+        tr.appendChild(tdDemo);
+
+        // 描紅 3 格
+        for (let i = 0; i < 3; i++) {
+          const tdTrace = document.createElement('td');
+          tdTrace.innerHTML = `<div class="tian-grid-normal">${createTianGridSVG(glyph, { showGhost: true })}</div>`;
+          tr.appendChild(tdTrace);
+        }
+
+        // 自寫 3 格
+        for (let i = 0; i < 3; i++) {
+          const tdBlank = document.createElement('td');
+          tdBlank.innerHTML = `<div class="tian-grid-normal">${createTianGridSVG(null)}</div>`;
+          tr.appendChild(tdBlank);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    function buildHanziTable() {
+      const tbody = document.getElementById('tbody-hanzi');
+      tbody.innerHTML = '';
+
+      const keys = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+      for (const k of keys) {
+        const glyph = window.GLYPHS_HANZI[k];
+        if (!glyph) continue;
+
+        const tr = document.createElement('tr');
+
+        // 國字加注音
+        const tdChar = document.createElement('td');
+        tdChar.className = 'char-cell';
+        tdChar.innerHTML = `<div>${k}</div><span class="bpmf-sub">${glyph.bpmf}</span>`;
+        tr.appendChild(tdChar);
+
+        // 示範格 (1.5倍)
+        const tdDemo = document.createElement('td');
+        tdDemo.innerHTML = `<div class="tian-grid-demo">${createTianGridSVG(glyph, { showDemo: true })}</div>`;
+        tr.appendChild(tdDemo);
+
+        // 描紅 3 格
+        for (let i = 0; i < 3; i++) {
+          const tdTrace = document.createElement('td');
+          tdTrace.innerHTML = `<div class="tian-grid-normal">${createTianGridSVG(glyph, { showGhost: true })}</div>`;
+          tr.appendChild(tdTrace);
+        }
+
+        // 自寫 3 格
+        for (let i = 0; i < 3; i++) {
+          const tdBlank = document.createElement('td');
+          tdBlank.innerHTML = `<div class="tian-grid-normal">${createTianGridSVG(null)}</div>`;
+          tr.appendChild(tdBlank);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    let currentSolitaireList = [];
+
+    function generateSolitaire10() {
+      const list = [];
+      list.push({ sequence: [2, 3, null, 5, null], fullSequence: [2, 3, 4, 5, 6], direction: 'asc' });
+      list.push({ sequence: [5, null, 7, null, null, 10], fullSequence: [5, 6, 7, 8, 9, 10], direction: 'asc' });
+      list.push({ sequence: [1, null, 3, null, null, 6, 7, null], fullSequence: [1, 2, 3, 4, 5, 6, 7, 8], direction: 'asc' });
+
+      for (let i = 4; i <= 7; i++) {
+        list.push(window.StrokeEngine.SolitaireGenerator.generateRandomQuestion({
+          direction: 'asc',
+          length: (i % 2 === 0) ? 6 : 7,
+          blanks: (i % 2 === 0) ? 2 : 3
+        }));
+      }
+
+      for (let i = 8; i <= 10; i++) {
+        list.push(window.StrokeEngine.SolitaireGenerator.generateRandomQuestion({
+          direction: 'desc',
+          length: (i === 10) ? 6 : 5,
+          blanks: 2
+        }));
+      }
+      return list;
+    }
+
+    function renderSolitaireSheets() {
+      const qContainer = document.getElementById('solitaire-questions-container');
+      const aContainer = document.getElementById('solitaire-answers-container');
+      qContainer.innerHTML = '';
+      aContainer.innerHTML = '';
+
+      currentSolitaireList.forEach((q, idx) => {
+        // 題目卷
+        const qItem = document.createElement('div');
+        qItem.className = 'solitaire-item';
+        qItem.innerHTML = `<div class="q-number">第 ${idx + 1} 題</div>`;
+
+        const flow = document.createElement('div');
+        flow.className = 'sequence-flow';
+        q.sequence.forEach((val, sIdx) => {
+          if (val === null) {
+            flow.innerHTML += `<div class="seq-blank"> </div>`;
+          } else {
+            flow.innerHTML += `<div class="seq-num">${val}</div>`;
+          }
+          if (sIdx < q.sequence.length - 1) flow.innerHTML += `<span class="seq-arrow">→</span>`;
+        });
+        qItem.appendChild(flow);
+        qContainer.appendChild(qItem);
+
+        // 解答卷
+        const aItem = document.createElement('div');
+        aItem.className = 'solitaire-item';
+        aItem.innerHTML = `<div class="q-number">第 ${idx + 1} 題</div>`;
+
+        const aFlow = document.createElement('div');
+        aFlow.className = 'sequence-flow';
+        q.fullSequence.forEach((val, sIdx) => {
+          const isBlank = (q.sequence[sIdx] === null);
+          const style = isBlank ? 'background:#ffedd5; border-color:#f97316; color:#c2410c;' : '';
+          aFlow.innerHTML += `<div class="${isBlank ? 'seq-blank' : 'seq-num'}" style="${style}">${val}</div>`;
+          if (sIdx < q.fullSequence.length - 1) aFlow.innerHTML += `<span class="seq-arrow">→</span>`;
+        });
+        aItem.appendChild(aFlow);
+        aContainer.appendChild(aItem);
+      });
+    }
+
+    function regenerateSolitaire() {
+      currentSolitaireList = generateSolitaire10();
+      renderSolitaireSheets();
+    }
+
+    function showSheet(type) {
+      document.getElementById('sheet-digits').style.display = (type === 'digits') ? 'flex' : 'none';
+      document.getElementById('sheet-hanzi').style.display = (type === 'hanzi') ? 'flex' : 'none';
+      document.getElementById('sheet-solitaire').style.display = (type === 'solitaire') ? 'block' : 'none';
+      document.getElementById('btn-regen-solitaire').style.display = (type === 'solitaire') ? 'inline-flex' : 'none';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      buildDigitsTable();
+      buildHanziTable();
+      currentSolitaireList = generateSolitaire10();
+      renderSolitaireSheets();
+
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab === 'hanzi') showSheet('hanzi');
+      else if (tab === 'solitaire') showSheet('solitaire');
+      else showSheet('digits');
+    });
+  </script>
+</body>
+</html>

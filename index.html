@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>一年級「數字筆順」冒險學習網頁 — 景美國小</title>
+  <style>
+    @font-face {
+      font-family: 'BpmfIansui';
+      src: url('fonts/BpmfIansui.woff2') format('woff2'),
+           url('fonts/BpmfIansui.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --bg-ocean: #0ea5e9;
+      --bg-ocean-deep: #0369a1;
+      --bg-island: #fef08a;
+      --sand-color: #fef3c7;
+      --coral-orange: #f97316;
+      --coral-light: #ffedd5;
+      --sea-teal: #0d9488;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --card-bg: #ffffff;
+      --gold-star: #eab308;
+      --font-family: 'BpmfIansui', "Microsoft JhengHei", "PingFang TC", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #e0f2fe;
+      color: var(--text-main);
+      font-size: 24px;
+      line-height: 1.4;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 頂部導航列 */
+    header {
+      background: #ffffff;
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .app-icon {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #0369a1;
+      letter-spacing: 1px;
+    }
+
+    .app-subtitle {
+      font-size: 15px;
+      color: #64748b;
+      margin-top: -3px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 按鈕共用樣式：高至少 64px */
+    .btn {
+      height: 64px;
+      min-width: 64px;
+      padding: 8px 18px;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 22px;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary { background: #0284c7; color: #ffffff; }
+    .btn-secondary { background: #f8fafc; color: #334155; border: 2px solid #cbd5e1; }
+    .btn-accent { background: #f97316; color: #ffffff; }
+    .btn-success { background: #16a34a; color: #ffffff; }
+    .btn-warning { background: #eab308; color: #713f12; }
+
+    /* 齒輪按鈕：按住 > 0.5s 才顯示圓形進度圈，達 2 秒進入 */
+    .gear-btn {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #f8fafc;
+      border: 2.5px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .gear-btn svg:not(.gear-progress-ring) {
+      width: 30px;
+      height: 30px;
+      fill: #475569;
+    }
+
+    .gear-progress-ring {
+      position: absolute;
+      top: -2.5px;
+      left: -2.5px;
+      width: 58px;
+      height: 58px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .gear-progress-ring.visible {
+      opacity: 1;
+    }
+
+    .gear-progress-circle {
+      stroke-dasharray: 170;
+      stroke-dashoffset: 170;
+      transition: stroke-dashoffset 1.5s linear;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    /* 玩家資訊顯示 */
+    .player-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: 30px;
+      height: 52px;
+      font-size: 19px;
+      font-weight: bold;
+      color: #166534;
+      cursor: pointer;
+    }
+
+    .player-avatar-icon { font-size: 24px; }
+
+    .teacher-badge {
+      display: none;
+      background: #fef08a;
+      color: #854d0e;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      border: 1.5px solid #eab308;
+    }
+
+    /* 主視圖容器 */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .view-panel {
+      display: none !important;
+      flex: 1;
+      width: 100%;
+    }
+
+    .view-panel.active {
+      display: flex !important;
+      flex-direction: column;
+    }
+
+    /* ========================================= */
+    /* 1. 真正的海圖視圖 (Nautical Chart Map) */
+    /* ========================================= */
+    #map-view {
+      background: radial-gradient(circle at 50% 30%, #38bdf8 0%, #0369a1 100%);
+      min-height: calc(100vh - 84px);
+      padding: 16px 16px 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .map-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 8px 24px;
+      border-radius: 30px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      border: 2.5px solid #7dd3fc;
+      margin-bottom: 14px;
+      z-index: 2;
+    }
+
+    .turtle-guide-icon { width: 42px; height: 42px; }
+    .map-banner-text { font-size: 22px; font-weight: bold; color: #0369a1; }
+
+    /* 海圖容器 */
+    .chart-container {
+      width: 100%;
+      max-width: 1040px;
+      background: #0284c7;
+      border-radius: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+      border: 4px solid #bae6fd;
+      position: relative;
+      overflow-y: auto;
+      max-height: calc(100vh - 165px);
+    }
+
+    .chart-svg-desktop {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .chart-svg-mobile {
+      width: 100%;
+      height: auto;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .chart-svg-desktop {
+        display: none !important;
+      }
+      .chart-svg-mobile {
+        display: block !important;
+      }
+      .chart-container {
+        max-height: calc(100vh - 150px);
+        border-radius: 18px;
+      }
+    }
+
+    /* 海圖島嶼可點擊群組 */
+    .svg-island-group {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .svg-island-group:hover {
+      filter: drop-shadow(0 0 12px rgba(253, 224, 71, 0.8));
+    }
+
+    /* HTML 絕對定位島名標籤（解決 SVG 裁字，支援動態寬度與自動避界） */
+    .island-badge {
+      position: absolute;
+      width: max-content;
+      white-space: nowrap;
+      font-size: 18px;
+      font-weight: bold;
+      color: #0369a1;
+      background: #ffffff;
+      border: 2.5px solid #0284c7;
+      border-radius: 12px;
+      padding: 6px 12px; /* 左右 padding 12px */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.15s, background-color 0.15s, box-shadow 0.15s;
+    }
+    .island-badge:hover {
+      transform: scale(1.05);
+      background: #f0f9ff;
+      box-shadow: 0 6px 14px rgba(2, 132, 199, 0.3);
+    }
+
+    .map-footer {
+      max-width: 1040px;
+      width: 100%;
+      margin: 16px auto 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    /* ========================================= */
+    /* 2. 單字筆順練習視圖 (Practice View) */
+    /* ========================================= */
+    #practice-view {
+      background: #f8fafc;
+      padding: 14px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .practice-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .steps-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 6px 14px;
+      border-radius: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 19px;
+      font-weight: bold;
+      color: #94a3b8;
+      padding: 4px 12px;
+      border-radius: 16px;
+      transition: all 0.2s;
+    }
+
+    .step-item.active { background: #e0f2fe; color: #0284c7; }
+    .step-item.done { color: #16a34a; }
+
+    .practice-main-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      flex: 1;
+      align-items: center;
+    }
+
+    @media (max-width: 860px) {
+      .practice-main-grid {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
+      border: 3.5px solid #cbd5e1;
+      overflow: hidden;
+      margin: 0 auto;
+      touch-action: none;
+    }
+
+    #stroke-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    .read-count-card {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10;
+      border-radius: 20px;
+    }
+
+    .counterpart-display {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .display-big-char { font-size: 72px; font-weight: bold; color: #0284c7; line-height: 1; }
+    .display-big-counterpart { font-size: 58px; font-weight: bold; color: #f97316; line-height: 1; }
+
+    .dots-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      max-width: 320px;
+      margin-bottom: 18px;
+      min-height: 70px;
+      align-items: center;
+    }
+
+    .count-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f97316;
+      border: 3px solid #ea580c;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    }
+
+    .empty-plate-icon { font-size: 64px; }
+
+    .practice-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 310px;
+    }
+
+    .guide-tip-box {
+      background: #ffffff;
+      padding: 14px 18px;
+      border-radius: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border-left: 6px solid #0284c7;
+    }
+
+    .guide-turtle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .guide-text { font-size: 20px; color: #1e293b; font-weight: bold; }
+    .stroke-name-tag {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 18px;
+      margin-top: 4px;
+    }
+
+    /* ========================================= */
+    /* 3. 數字接龍視圖 (Solitaire View) */
+    /* ========================================= */
+    #solitaire-view {
+      background: #f8fafc;
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 1040px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .solitaire-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .solitaire-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      border: 2.5px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .solitaire-question-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .sol-cell {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+
+    .sol-cell.filled {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 3px solid #7dd3fc;
+    }
+
+    .sol-cell.blank {
+      background: #ffffff;
+      color: #f97316;
+      border: 3.5px dashed #f97316;
+      cursor: pointer;
+    }
+
+    .sol-cell.blank.selected {
+      background: #ffedd5;
+      border-style: solid;
+      box-shadow: 0 0 0 4px #fdba74;
+      transform: scale(1.08);
+    }
+
+    .sol-cell.wrong-shake {
+      animation: shakeCell 0.4s ease-in-out;
+      border-color: #ef4444;
+      background: #fee2e2;
+    }
+
+    @keyframes shakeCell {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    .sol-arrow { font-size: 26px; color: #94a3b8; }
+
+    .number-line-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 10px 18px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .num-line-node {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      font-weight: bold;
+      color: #475569;
+    }
+
+    .num-line-node.highlight {
+      background: #f97316;
+      color: #ffffff;
+      border-color: #ea580c;
+      transform: scale(1.15);
+    }
+
+    .digit-keypad {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .key-btn {
+      height: 66px;
+      font-size: 30px;
+      font-weight: bold;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 2.5px solid #94a3b8;
+      color: #0f172a;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .key-btn:active { transform: scale(0.94); background: #e2e8f0; }
+
+    /* ========================================= */
+    /* 4. 島嶼關卡展開彈出面板 (Island Levels Drawer) */
+    /* ========================================= */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 26px;
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 48px rgba(0,0,0,0.22);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: #f8fafc;
+      padding: 16px 22px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .island-levels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+      gap: 14px;
+      padding: 10px 0;
+    }
+
+    .level-box {
+      height: 96px;
+      background: #f8fafc;
+      border-radius: 20px;
+      border: 3px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+    .level-box:hover:not(.locked) {
+      transform: scale(1.06);
+      border-color: #0284c7;
+      background: #f0f9ff;
+    }
+    .level-box.locked {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    .level-char { font-size: 34px; font-weight: bold; color: #0f172a; line-height: 1; }
+    .level-stars { display: flex; gap: 2px; margin-top: 4px; font-size: 14px; color: #eab308; }
+
+    /* 第一次進入歡迎設定彈窗 */
+    .avatar-picker-grid {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+    .avatar-opt {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2.5px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .avatar-opt.selected {
+      border-color: #0284c7;
+      background: #e0f2fe;
+      transform: scale(1.15);
+    }
+
+    .name-input {
+      width: 100%;
+      height: 56px;
+      border: 2px solid #94a3b8;
+      border-radius: 14px;
+      padding: 0 16px;
+      font-size: 22px;
+      font-family: inherit;
+      outline: none;
+      text-align: center;
+    }
+    .name-input:focus { border-color: #0284c7; }
+
+    /* 家長專區表格 */
+    .section-card {
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 16px 18px;
+      border: 1.5px solid #e2e8f0;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .report-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 17px;
+    }
+    .report-table th, .report-table td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    .report-table th { background: #f1f5f9; }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 19px;
+    }
+    .switch-btn {
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: bold;
+    }
+    .switch-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+    }
+
+    /* 寶物箱 */
+    .treasures-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 14px;
+      padding: 10px 0;
+    }
+    .treasure-item {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .treasure-item.unlocked { border-color: #fde047; background: #fefce8; }
+    .treasure-icon { font-size: 40px; filter: grayscale(100%); opacity: 0.35; }
+    .treasure-item.unlocked .treasure-icon { filter: none; opacity: 1; }
+    .treasure-name { font-size: 17px; font-weight: bold; color: #475569; }
+    .treasure-item.unlocked .treasure-name { color: #854d0e; }
+
+    /* 響應式優化：手機與窄螢幕 (<= 640px) */
+    @media (max-width: 640px) {
+      header { padding: 6px 8px; gap: 4px; }
+      .app-title-group { gap: 4px; }
+      .app-icon { display: none !important; }
+      .app-title { font-size: 15px; white-space: nowrap; }
+      .app-subtitle { display: none; }
+      .top-actions { gap: 4px; }
+      .top-actions .btn { height: 38px; font-size: 13px; padding: 2px 6px; border-radius: 10px; }
+      .player-badge { height: 38px; padding: 2px 6px; font-size: 14px; border-radius: 16px; }
+      .player-badge span:not(.player-avatar-icon) { display: none !important; }
+      .gear-btn { width: 38px; height: 38px; min-width: 38px; }
+      .gear-btn svg:not(.gear-progress-ring) { width: 20px; height: 20px; }
+      .gear-progress-ring { width: 38px; height: 38px; }
+      .gear-progress-circle { r: 17; stroke-dasharray: 108; stroke-dashoffset: 108; }
+      .map-banner { padding: 6px 12px; }
+      .map-banner-text { font-size: 15px; }
+      .turtle-guide-icon { width: 30px; height: 30px; }
+      .chart-container { border-radius: 16px; border-width: 2.5px; }
+      .practice-nav-bar { flex-wrap: wrap; gap: 6px; }
+      .steps-progress { padding: 4px 6px; gap: 2px; order: 3; width: 100%; justify-content: space-around; }
+      .step-item { font-size: 14px; padding: 2px 6px; }
+      .canvas-wrapper { max-width: 80vw; }
+      .practice-controls { max-width: 100%; }
+      .guide-text { font-size: 17px; }
+      .solitaire-header { flex-wrap: wrap; gap: 6px; }
+      .solitaire-header .btn { height: 38px; font-size: 15px; padding: 2px 8px; }
+      .sol-cell { width: 50px; height: 50px; font-size: 26px; border-radius: 12px; }
+      .digit-keypad { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .key-btn { height: 54px; font-size: 24px; }
+      .modal-card { max-height: 94vh; border-radius: 18px; }
+      .modal-header { padding: 10px 14px; }
+      .modal-body { padding: 12px; gap: 14px; }
+      .modal-title { font-size: 19px; }
+      .section-card { padding: 10px 12px; }
+      .section-title { font-size: 17px; }
+      .setting-row { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導航列 -->
+  <header>
+    <div class="app-title-group" onclick="showView('map')">
+      <div class="app-icon">
+        <svg viewBox="0 0 100 100" style="width: 40px; height: 40px;">
+          <ellipse cx="50" cy="52" rx="30" ry="24" fill="#22c55e" stroke="#15803d" stroke-width="3" />
+          <path d="M50,28 L50,76 M20,52 L80,52 M32,36 L68,68 M32,68 L68,36" stroke="#15803d" stroke-width="2" fill="none" />
+          <circle cx="50" cy="20" r="12" fill="#86efac" stroke="#15803d" stroke-width="2.5" />
+          <circle cx="46" cy="18" r="2.5" fill="#0f172a" />
+          <circle cx="54" cy="18" r="2.5" fill="#0f172a" />
+        </svg>
+      </div>
+      <div>
+        <div class="app-title">數字筆順冒險島</div>
+        <div class="app-subtitle">景美國小一年級數學領域</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <div id="teacher-badge-tag" class="teacher-badge">👨‍🏫 老師模式</div>
+
+      <button class="btn btn-secondary" onclick="openTreasureModal()" style="height:48px; padding:4px 12px; font-size:18px;">
+        🎁 (<span id="treasure-count-badge">0</span>)
+      </button>
+
+      <div class="player-badge" onclick="openParentModal('profiles')">
+        <span class="player-avatar-icon" id="cur-avatar-icon">🐢</span>
+        <span id="cur-player-name">小水手 1</span>
+      </div>
+
+      <!-- 齒輪按鈕：按住超過 0.5 秒才顯示進度圈，達 2 秒開家長專區 -->
+      <div class="gear-btn" id="gear-btn" title="家長與老師設定">
+        <svg viewBox="0 0 24 24">
+          <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+        </svg>
+        <svg class="gear-progress-ring" id="gear-progress-ring" viewBox="0 0 58 58">
+          <circle class="gear-progress-circle" id="gear-progress-circle" cx="29" cy="29" r="27" fill="none" stroke="#0284c7" stroke-width="3.5" />
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主視圖區域 -->
+  <main>
+
+    <!-- ============================================== -->
+    <!-- 1. 冒險海圖視圖 (Nautical Chart Map) -->
+    <!-- ============================================== -->
+    <div id="map-view" class="view-panel active">
+      <div class="map-banner">
+        <div class="turtle-guide-icon">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <ellipse cx="50" cy="52" rx="30" ry="24" fill="#22c55e" stroke="#15803d" stroke-width="3" />
+            <circle cx="50" cy="20" r="12" fill="#86efac" stroke="#15803d" stroke-width="2.5" />
+            <circle cx="46" cy="18" r="2.5" fill="#0f172a" />
+            <circle cx="54" cy="18" r="2.5" fill="#0f172a" />
+          </svg>
+        </div>
+        <div class="map-banner-text">點擊海圖上的島嶼，展開挑戰關卡！</div>
+      </div>
+
+      <!-- 真正的 SVG 海圖 -->
+      <!-- 真正的 SVG 海圖（桌面橫向與手機直向響應式） -->
+      <div class="chart-container">
+
+        <!-- ============================================== -->
+        <!-- 桌面版橫向海圖 (viewBox: 1000 x 550) -->
+        <!-- ============================================== -->
+        <svg viewBox="0 0 1000 550" class="chart-svg-desktop" id="nautical-svg-desktop">
+          <defs>
+            <linearGradient id="seaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0284c7" />
+              <stop offset="60%" stop-color="#0369a1" />
+              <stop offset="100%" stop-color="#075985" />
+            </linearGradient>
+            <linearGradient id="sandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fef08a" />
+              <stop offset="100%" stop-color="#fde047" />
+            </linearGradient>
+            <linearGradient id="forestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac" />
+              <stop offset="100%" stop-color="#22c55e" />
+            </linearGradient>
+          </defs>
+
+          <!-- 海洋主背景 -->
+          <rect width="1000" height="550" fill="url(#seaGrad)" />
+
+          <!-- 海圖經緯網格線 -->
+          <g stroke="rgba(255,255,255,0.12)" stroke-width="1.2" stroke-dasharray="6,6">
+            <line x1="0" y1="140" x2="1000" y2="140" />
+            <line x1="0" y1="280" x2="1000" y2="280" />
+            <line x1="0" y1="420" x2="1000" y2="420" />
+            <line x1="250" y1="0" x2="250" y2="550" />
+            <line x1="500" y1="0" x2="500" y2="550" />
+            <line x1="750" y1="0" x2="750" y2="550" />
+          </g>
+
+          <!-- 航海羅盤玫瑰（右上角） -->
+          <g transform="translate(920, 80)">
+            <circle cx="0" cy="0" r="38" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+            <polygon points="0,-32 6,-7 0,-3 -6,-7" fill="#f87171" />
+            <polygon points="0,32 6,7 0,3 -6,7" fill="#e2e8f0" />
+            <polygon points="-32,0 -7,-6 -3,0 -7,6" fill="#e2e8f0" />
+            <polygon points="32,0 7,-6 3,0 7,6" fill="#e2e8f0" />
+            <circle cx="0" cy="0" r="3.5" fill="#0f172a" />
+            <text x="-4" y="-34" font-size="11" font-weight="bold" fill="#fecaca" font-family="sans-serif">N</text>
+          </g>
+
+          <!-- 波浪紋理裝飾 -->
+          <g fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2" stroke-linecap="round">
+            <path d="M70,60 Q90,50 110,60 T150,60" />
+            <path d="M330,80 Q350,70 370,80 T410,80" />
+            <path d="M680,160 Q700,150 720,160 T760,160" />
+            <path d="M100,320 Q120,310 140,320 T180,320" />
+            <path d="M400,490 Q420,480 440,490 T480,490" />
+          </g>
+
+          <!-- 島與島之間的航道虛線 -->
+          <g fill="none" stroke="#fef08a" stroke-width="3" stroke-dasharray="10,8" stroke-linecap="round" opacity="0.85">
+            <path d="M230,170 Q350,110 430,130" />
+            <path d="M480,210 Q380,290 270,340" />
+            <path d="M290,380 Q390,410 470,370" />
+            <path d="M580,350 Q670,330 740,280" />
+          </g>
+
+          <!-- 1. 數字島 A (0–5) -->
+          <g class="svg-island-group" id="svg-island-digits-a" onclick="openIslandModal('digits-a')">
+            <path d="M100,170 C90,125 160,95 210,115 C250,130 260,180 240,215 C210,248 130,238 100,170 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M120,165 C115,135 165,115 195,128 C225,138 235,178 220,200 C195,225 140,215 120,165 Z" fill="url(#forestGrad)" />
+            <path d="M160,160 Q155,135 150,125" stroke="#854d0e" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <circle cx="146" cy="122" r="11" fill="#15803d" />
+            <circle cx="156" cy="122" r="9" fill="#16a34a" />
+            <g data-flag="digits-a" id="flag-digits-a" style="display:none;" transform="translate(185, 90)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 2. 數字島 B (6–10) -->
+          <g class="svg-island-group" id="svg-island-digits-b" onclick="openIslandModal('digits-b')">
+            <path d="M420,140 C410,95 480,70 530,90 C580,110 590,160 565,195 C530,228 450,215 420,140 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M440,135 C435,108 485,88 515,102 C545,116 555,155 540,180 C515,205 460,195 440,135 Z" fill="url(#forestGrad)" />
+            <circle cx="490" cy="130" r="10" fill="#ef4444" />
+            <path d="M490,120 A10,10 0 0,1 490,140 Z" fill="#ffffff" />
+            <g data-flag="digits-b" id="flag-digits-b" style="display:none;" transform="translate(510, 65)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 3. 國字島 A (一～五) -->
+          <g class="svg-island-group" id="svg-island-hanzi-a" onclick="openIslandModal('hanzi-a')">
+            <path d="M150,380 C135,325 210,295 260,320 C310,345 320,400 290,438 C255,478 175,460 150,380 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M170,375 C160,338 215,315 245,335 C275,355 285,395 265,422 C240,450 185,438 170,375 Z" fill="url(#forestGrad)" />
+            <path d="M220,360 Q225,335 230,325" stroke="#854d0e" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <circle cx="232" cy="322" r="11" fill="#15803d" />
+            <g data-flag="hanzi-a" id="flag-hanzi-a" style="display:none;" transform="translate(240, 290)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 4. 國字島 B (六～十) -->
+          <g class="svg-island-group" id="svg-island-hanzi-b" onclick="openIslandModal('hanzi-b')">
+            <path d="M460,370 C445,315 525,290 575,315 C625,340 630,395 605,435 C570,475 490,458 460,370 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M480,365 C470,328 530,308 560,328 C590,348 595,390 575,418 C550,448 495,435 480,365 Z" fill="url(#forestGrad)" />
+            <circle cx="520" cy="355" r="9" fill="#f43f5e" />
+            <circle cx="538" cy="350" r="7" fill="#fbbf24" />
+            <g data-flag="hanzi-b" id="flag-hanzi-b" style="display:none;" transform="translate(550, 285)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 5. 接龍島 (共 5 關) -->
+          <g class="svg-island-group" id="svg-island-solitaire" onclick="openIslandModal('solitaire')">
+            <path d="M740,260 C720,195 820,165 875,195 C930,225 940,290 910,332 C865,378 770,360 740,260 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3.5" />
+            <path d="M765,255 C750,210 825,185 865,210 C905,232 910,285 885,318 C850,350 785,338 765,255 Z" fill="url(#forestGrad)" />
+            <polygon points="815,240 825,215 835,240" fill="#a855f7" stroke="#6b21a8" stroke-width="1.5" />
+            <polygon points="835,245 845,220 855,245" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5" />
+            <g data-flag="solitaire" id="flag-solitaire" style="display:none;" transform="translate(850, 170)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 桌面小帆船 -->
+          <g id="sailboat-group" transform="translate(270, 170)">
+            <path d="M-22,12 L22,12 L14,24 L-14,24 Z" fill="#92400e" stroke="#451a03" stroke-width="1.5" />
+            <line x1="0" y1="12" x2="0" y2="-18" stroke="#451a03" stroke-width="2" />
+            <path d="M0,-16 L18,8 L0,8 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <path d="M0,-8 L9,4 L0,4 Z" fill="#ef4444" />
+            <polygon points="0,-18 -10,-14 0,-10" fill="#facc15" />
+            <ellipse cx="0" cy="25" rx="20" ry="3" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
+          </g>
+        </svg>
+
+        <!-- ============================================== -->
+        <!-- 手機版直向海圖 (viewBox: 420 x 1220，寬度 < 600px 顯示) -->
+        <!-- ============================================== -->
+        <svg viewBox="0 0 420 1220" class="chart-svg-mobile" id="nautical-svg-mobile">
+          <defs>
+            <linearGradient id="seaGradMob" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#0284c7" />
+              <stop offset="50%" stop-color="#0369a1" />
+              <stop offset="100%" stop-color="#075985" />
+            </linearGradient>
+            <linearGradient id="sandGradMob" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fef08a" />
+              <stop offset="100%" stop-color="#fde047" />
+            </linearGradient>
+            <linearGradient id="forestGradMob" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac" />
+              <stop offset="100%" stop-color="#22c55e" />
+            </linearGradient>
+            <!-- 同步定義 sandGrad 與 forestGrad 確保任何參照均可正確填色 -->
+            <linearGradient id="sandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fef08a" />
+              <stop offset="100%" stop-color="#fde047" />
+            </linearGradient>
+            <linearGradient id="forestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac" />
+              <stop offset="100%" stop-color="#22c55e" />
+            </linearGradient>
+          </defs>
+
+          <!-- 海洋垂直底圖 -->
+          <rect width="420" height="1220" fill="url(#seaGradMob)" />
+
+          <!-- 海圖網格 -->
+          <g stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="6,6">
+            <line x1="0" y1="240" x2="420" y2="240" />
+            <line x1="0" y1="480" x2="420" y2="480" />
+            <line x1="0" y1="720" x2="420" y2="720" />
+            <line x1="0" y1="960" x2="420" y2="960" />
+            <line x1="210" y1="0" x2="210" y2="1220" />
+          </g>
+
+          <!-- 羅盤（頂部右上角） -->
+          <g transform="translate(365, 45)">
+            <circle cx="0" cy="0" r="28" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" />
+            <polygon points="0,-24 5,-5 0,-2 -5,-5" fill="#f87171" />
+            <polygon points="0,24 5,5 0,2 -5,5" fill="#e2e8f0" />
+            <circle cx="0" cy="0" r="2.5" fill="#0f172a" />
+            <text x="-4" y="-26" font-size="10" font-weight="bold" fill="#fecaca" font-family="sans-serif">N</text>
+          </g>
+
+          <!-- 波浪紋理裝飾 -->
+          <g fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2" stroke-linecap="round">
+            <path d="M40,70 Q60,60 80,70 T120,70" />
+            <path d="M280,260 Q300,250 320,260 T360,260" />
+            <path d="M50,490 Q70,480 90,490 T130,490" />
+            <path d="M270,730 Q290,720 310,730 T350,730" />
+            <path d="M60,950 Q80,940 100,950 T140,950" />
+          </g>
+
+          <!-- 蜿蜒航道（手機直向連結 5 座島） -->
+          <g fill="none" stroke="#fef08a" stroke-width="3.5" stroke-dasharray="10,8" stroke-linecap="round" opacity="0.85">
+            <path d="M210,180 Q140,270 210,360" />
+            <path d="M210,410 Q280,510 210,610" />
+            <path d="M210,660 Q140,750 210,850" />
+            <path d="M210,900 Q280,990 210,1070" />
+          </g>
+
+          <!-- 1. 數字島 A (手機版，共用寬版圖形與填色裝飾) -->
+          <g class="svg-island-group" id="svg-island-digits-a-mob" transform="translate(35, -40)" onclick="openIslandModal('digits-a')">
+            <path d="M100,170 C90,125 160,95 210,115 C250,130 260,180 240,215 C210,248 130,238 100,170 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M120,165 C115,135 165,115 195,128 C225,138 235,178 220,200 C195,225 140,215 120,165 Z" fill="url(#forestGrad)" />
+            <path d="M160,160 Q155,135 150,125" stroke="#854d0e" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <circle cx="146" cy="122" r="11" fill="#15803d" />
+            <circle cx="156" cy="122" r="9" fill="#16a34a" />
+            <g data-flag="digits-a" id="flag-mobile-digits-a" style="display:none;" transform="translate(185, 90)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 2. 數字島 B (手機版，共用寬版圖形與填色裝飾) -->
+          <g class="svg-island-group" id="svg-island-digits-b-mob" transform="translate(-290, 220)" onclick="openIslandModal('digits-b')">
+            <path d="M420,140 C410,95 480,70 530,90 C580,110 590,160 565,195 C530,228 450,215 420,140 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M440,135 C435,108 485,88 515,102 C545,116 555,155 540,180 C515,205 460,195 440,135 Z" fill="url(#forestGrad)" />
+            <circle cx="490" cy="130" r="10" fill="#ef4444" />
+            <path d="M490,120 A10,10 0 0,1 490,140 Z" fill="#ffffff" />
+            <g data-flag="digits-b" id="flag-mobile-digits-b" style="display:none;" transform="translate(510, 65)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 3. 國字島 A (手機版，共用寬版圖形與填色裝飾) -->
+          <g class="svg-island-group" id="svg-island-hanzi-a-mob" transform="translate(-20, 225)" onclick="openIslandModal('hanzi-a')">
+            <path d="M150,380 C135,325 210,295 260,320 C310,345 320,400 290,438 C255,478 175,460 150,380 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M170,375 C160,338 215,315 245,335 C275,355 285,395 265,422 C240,450 185,438 170,375 Z" fill="url(#forestGrad)" />
+            <path d="M220,360 Q225,335 230,325" stroke="#854d0e" stroke-width="3.5" fill="none" stroke-linecap="round" />
+            <circle cx="232" cy="322" r="11" fill="#15803d" />
+            <g data-flag="hanzi-a" id="flag-mobile-hanzi-a" style="display:none;" transform="translate(240, 290)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 4. 國字島 B (手機版，共用寬版圖形與填色裝飾) -->
+          <g class="svg-island-group" id="svg-island-hanzi-b-mob" transform="translate(-330, 465)" onclick="openIslandModal('hanzi-b')">
+            <path d="M460,370 C445,315 525,290 575,315 C625,340 630,395 605,435 C570,475 490,458 460,370 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3" />
+            <path d="M480,365 C470,328 530,308 560,328 C590,348 595,390 575,418 C550,448 495,435 480,365 Z" fill="url(#forestGrad)" />
+            <circle cx="520" cy="355" r="9" fill="#f43f5e" />
+            <circle cx="538" cy="350" r="7" fill="#fbbf24" />
+            <g data-flag="hanzi-b" id="flag-mobile-hanzi-b" style="display:none;" transform="translate(550, 285)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 5. 接龍島 (手機版，共用寬版圖形與填色裝飾) -->
+          <g class="svg-island-group" id="svg-island-solitaire-mob" transform="translate(-620, 800)" onclick="openIslandModal('solitaire')">
+            <path d="M740,260 C720,195 820,165 875,195 C930,225 940,290 910,332 C865,378 770,360 740,260 Z" fill="url(#sandGrad)" stroke="#ca8a04" stroke-width="3.5" />
+            <path d="M765,255 C750,210 825,185 865,210 C905,232 910,285 885,318 C850,350 785,338 765,255 Z" fill="url(#forestGrad)" />
+            <polygon points="815,240 825,215 835,240" fill="#a855f7" stroke="#6b21a8" stroke-width="1.5" />
+            <polygon points="835,245 845,220 855,245" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5" />
+            <g data-flag="solitaire" id="flag-mobile-solitaire" style="display:none;" transform="translate(850, 170)">
+              <line x1="0" y1="0" x2="0" y2="28" stroke="#78350f" stroke-width="2.5" />
+              <polygon points="0,0 20,6 0,13" fill="#eab308" />
+            </g>
+          </g>
+
+          <!-- 手機小帆船 -->
+          <g id="sailboat-mobile" transform="translate(290, 120)">
+            <path d="M-22,12 L22,12 L14,24 L-14,24 Z" fill="#92400e" stroke="#451a03" stroke-width="1.5" />
+            <line x1="0" y1="12" x2="0" y2="-18" stroke="#451a03" stroke-width="2" />
+            <path d="M0,-16 L18,8 L0,8 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <path d="M0,-8 L9,4 L0,4 Z" fill="#ef4444" />
+            <polygon points="0,-18 -10,-14 0,-10" fill="#facc15" />
+            <ellipse cx="0" cy="25" rx="20" ry="3" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
+          </g>
+        </svg>
+
+        <!-- HTML 絕對定位島名標籤（解決 SVG 裁字，支援動態寬度與自動避界） -->
+        <div class="island-badge" id="badge-digits-a" onclick="openIslandModal('digits-a')">數字島 A (0–5)</div>
+        <div class="island-badge" id="badge-digits-b" onclick="openIslandModal('digits-b')">數字島 B (6–10)</div>
+        <div class="island-badge" id="badge-hanzi-a" onclick="openIslandModal('hanzi-a')">國字島 A (一～五)</div>
+        <div class="island-badge" id="badge-hanzi-b" onclick="openIslandModal('hanzi-b')">國字島 B (六～十)</div>
+        <div class="island-badge" id="badge-solitaire" onclick="openIslandModal('solitaire')">接龍島 (共 5 關)</div>
+
+      </div>
+
+      <div class="map-footer">
+        <a href="print.html" class="btn btn-secondary" style="text-decoration:none;">
+          🖨️ A4 列印版學習單
+        </a>
+        <div style="font-size: 16px; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+          臺北市景美國小一年級數學領域教材
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 2. 單字練習視圖 (Practice) -->
+    <!-- ============================================== -->
+    <div id="practice-view" class="view-panel">
+      <div class="practice-nav-bar">
+        <button class="btn btn-secondary" onclick="showView('map')">
+          🏝️ 回海圖
+        </button>
+
+        <div class="steps-progress">
+          <div class="step-item" id="step-tag-1">1. 看</div>
+          <div class="step-item" id="step-tag-2">2. 讀與數</div>
+          <div class="step-item" id="step-tag-3">3. 描 (0/2)</div>
+          <div class="step-item" id="step-tag-4">4. 寫 (0/1)</div>
+        </div>
+
+        <div style="font-size: 26px; font-weight: bold; color: #0369a1;">
+          <span id="practice-title-char">8</span>
+          <span id="practice-stars-display" style="color:#eab308; margin-left: 6px;">⭐⭐⭐</span>
+        </div>
+      </div>
+
+      <div class="practice-main-grid">
+        <div class="canvas-wrapper">
+          <canvas id="stroke-canvas"></canvas>
+
+          <!-- 步驟 2：讀一讀、數一數 面板 -->
+          <div id="read-count-card" class="read-count-card" style="display: none;">
+            <div class="counterpart-display">
+              <div class="display-big-char" id="read-primary-char">8</div>
+              <div style="font-size: 32px; color: #94a3b8;">↔️</div>
+              <div class="display-big-counterpart" id="read-counterpart-char">八</div>
+            </div>
+
+            <div class="dots-container" id="dots-container"></div>
+
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+              <button class="btn btn-primary" id="btn-read-speech" onclick="speakCurrentChar()">
+                🔊 聽發音
+              </button>
+              <button class="btn btn-accent" onclick="advanceStep(3)">
+                ✏️ 開始描寫 ➔
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="practice-controls">
+          <div class="guide-tip-box">
+            <div class="guide-turtle-row">
+              <span style="font-size: 28px;">🐢</span>
+              <div class="guide-text" id="guide-turtle-text">小海龜示範筆順給你看喔！</div>
+            </div>
+            <div id="current-stroke-info" class="stroke-name-tag">第 1 筆</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div id="demo-buttons-group" style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" style="flex:1;" onclick="replayDemo(1.0)">
+                🔄 重播
+              </button>
+              <button class="btn btn-secondary" style="flex:1;" onclick="replayDemo(0.5)">
+                🐢 慢速
+              </button>
+            </div>
+
+            <button class="btn btn-warning" id="btn-teacher-next-stroke" style="display: none;" onclick="teacherStepStroke()">
+              👉 下一筆示範
+            </button>
+
+            <button class="btn btn-accent" id="btn-next-step" onclick="onNextStepClicked()">
+              下一步 ➔
+            </button>
+
+            <button class="btn btn-secondary" onclick="restartLevel()">
+              ↩️ 重新練習本關
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 3. 數字接龍視圖 (Solitaire) -->
+    <!-- ============================================== -->
+    <div id="solitaire-view" class="view-panel">
+      <div class="solitaire-header">
+        <button class="btn btn-secondary" onclick="showView('map')">
+          🏝️ 回海圖
+        </button>
+        <div style="font-size: 24px; font-weight: bold; color: #0369a1;">
+          接龍島 — 第 <span id="sol-level-num">1</span> 關（第 <span id="sol-q-idx">1</span>/5 題）
+        </div>
+        <div style="font-size: 22px; color: #eab308;">
+          ⭐ <span id="sol-stars-count">0</span>
+        </div>
+      </div>
+
+      <div class="solitaire-card">
+        <div style="font-size: 20px; color: #475569;" id="sol-hint-text">
+          點一下橘色空格，再點下方的數字填入喔！
+        </div>
+
+        <div class="solitaire-question-row" id="sol-question-row"></div>
+        <div class="number-line-hint" id="sol-number-line" style="display: none;"></div>
+      </div>
+
+      <div class="digit-keypad" id="sol-keypad">
+        <button class="key-btn" onclick="onKeypadInput(0)">0</button>
+        <button class="key-btn" onclick="onKeypadInput(1)">1</button>
+        <button class="key-btn" onclick="onKeypadInput(2)">2</button>
+        <button class="key-btn" onclick="onKeypadInput(3)">3</button>
+        <button class="key-btn" onclick="onKeypadInput(4)">4</button>
+        <button class="key-btn" onclick="onKeypadInput(5)">5</button>
+        <button class="key-btn" onclick="onKeypadInput(6)">6</button>
+        <button class="key-btn" onclick="onKeypadInput(7)">7</button>
+        <button class="key-btn" onclick="onKeypadInput(8)">8</button>
+        <button class="key-btn" onclick="onKeypadInput(9)">9</button>
+        <button class="key-btn" onclick="onKeypadInput(10)">10</button>
+        <button class="key-btn" onclick="clearCurrentBlank()" style="background:#fee2e2; color:#ef4444;">⌫</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- 4. 島嶼關卡展開彈出面板 (Island Drawer Modal) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="island-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="island-modal-title">
+          <span>🏝️</span>
+          <span>數字島 A (0–5)</span>
+        </div>
+        <button class="btn btn-secondary" style="height:44px; min-width:44px; padding:0 10px;" onclick="closeIslandModal()">
+          ✖
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 18px; color: #475569;" id="island-modal-desc">
+          點選解鎖的關卡格子即可出航練習喔！
+        </div>
+        <div class="island-levels-grid" id="island-modal-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 5. 第一次登入歡迎設定彈窗 (First Time Modal) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="first-time-modal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>⛵</span>
+          <span>歡迎加入數字筆順冒險島！</span>
+        </div>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="font-size: 18px; color: #334155;">請選一個喜歡的海洋頭像：</div>
+        <div class="avatar-picker-grid" id="welcome-avatars">
+          <div class="avatar-opt selected" onclick="selectWelcomeAvatar(this, '🐢')">🐢</div>
+          <div class="avatar-opt" onclick="selectWelcomeAvatar(this, '🐬')">🐬</div>
+          <div class="avatar-opt" onclick="selectWelcomeAvatar(this, '🐠')">🐠</div>
+          <div class="avatar-opt" onclick="selectWelcomeAvatar(this, '🐙')">🐙</div>
+          <div class="avatar-opt" onclick="selectWelcomeAvatar(this, '🦭')">🦭</div>
+          <div class="avatar-opt" onclick="selectWelcomeAvatar(this, '🐳')">🐳</div>
+        </div>
+
+        <div style="font-size: 18px; color: #334155; margin-top: 10px;">輸入你的名字（可以略過）：</div>
+        <input type="text" id="welcome-name-input" class="name-input" placeholder="例如：小美（預設小水手 1）" maxlength="10">
+
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <button class="btn btn-secondary" style="flex:1;" onclick="completeWelcome(true)">略過</button>
+          <button class="btn btn-primary" style="flex:2;" onclick="completeWelcome(false)">開始冒險！</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 6. 家長專區與老師設定彈窗 (Parent Modal) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="parent-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>⚙️</span>
+          <span>家長專區與學習設定</span>
+        </div>
+        <button class="btn btn-secondary" style="height:44px; min-width:44px; padding:0 10px;" onclick="closeParentModal()">
+          ✖
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="section-card">
+          <div class="section-title">👤 小朋友檔案（進度各自分開）</div>
+          <div class="profiles-grid" id="profiles-grid" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">📊 學習報告與練習紀錄</div>
+          <div id="report-summary-text" style="margin-bottom: 8px; font-weight: bold; color: #0369a1; font-size:18px;"></div>
+          <div style="max-height: 200px; overflow-y: auto;">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>字元</th>
+                  <th>獲得星數</th>
+                  <th>錯最多的筆畫</th>
+                  <th>最近練習日期</th>
+                </tr>
+              </thead>
+              <tbody id="report-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">🛠️ 練習與輔助設定</div>
+          
+          <div class="setting-row">
+            <span>描寫判定標準：</span>
+            <div style="display: flex; gap: 6px;">
+              <button class="switch-btn" id="btn-thresh-loose" onclick="setThresholdMode('loose')">寬鬆 (預設)</button>
+              <button class="switch-btn" id="btn-thresh-standard" onclick="setThresholdMode('standard')">標準 (進階)</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <span>輕快音效：</span>
+            <button class="switch-btn" id="btn-toggle-sound" onclick="toggleSound()">開啟</button>
+          </div>
+
+          <div class="setting-row">
+            <span>國語發音（zh-TW）：</span>
+            <button class="switch-btn" id="btn-toggle-speech" onclick="toggleSpeech()">開啟</button>
+          </div>
+
+          <div class="setting-row">
+            <span>老師模式（全解鎖／無計分／單步示範）：</span>
+            <button class="switch-btn" id="btn-toggle-teacher" onclick="toggleTeacherMode()">關閉</button>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">💾 備份與學習單列印</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <button class="btn btn-secondary" style="height:48px; font-size:17px;" onclick="exportDataJSON()">
+              📥 匯出紀錄 (JSON)
+            </button>
+            <button class="btn btn-secondary" style="height:48px; font-size:17px;" onclick="document.getElementById('import-file-input').click()">
+              📤 匯入紀錄 (JSON)
+            </button>
+            <input type="file" id="import-file-input" style="display:none;" accept=".json" onchange="importDataJSON(event)">
+            <a href="print.html" class="btn btn-primary" style="height:48px; font-size:17px; text-decoration:none;">
+              🖨️ 前往 A4 列印學習單
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 7. 寶物箱彈窗 (Treasure Box Modal) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="treasure-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>🎁</span>
+          <span>海洋寶物箱</span>
+        </div>
+        <button class="btn btn-secondary" style="height:44px; min-width:44px; padding:0 10px;" onclick="closeTreasureModal()">
+          ✖
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 18px; color: #475569; text-align: center;">
+          每完成一個關卡，就會獲得一個海洋小寶物喔！
+        </div>
+        <div class="treasures-grid" id="treasures-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 載入中線字形資料與引擎 -->
+  <script src="data/glyphs-digits.js"></script>
+  <script src="data/glyphs-hanzi.js"></script>
+  <script src="engine/stroke-engine.js"></script>
+
+  <script>
+    'use strict';
+
+    const STORAGE_KEY = 'jingmei_number_strokes_v1';
+
+    // 27 款寶物定義
+    const TREASURES_DEF = [
+      { id: 't0', icon: '🐚', name: '七彩貝殼' },
+      { id: 't1', icon: '⭐', name: '黃金海星' },
+      { id: 't2', icon: '🦪', name: '閃亮珍珠' },
+      { id: 't3', icon: '🪸', name: '粉紅珊瑚' },
+      { id: 't4', icon: '💎', name: '深海水晶' },
+      { id: 't5', icon: '🪙', name: '海盜金幣' },
+      { id: 't6', icon: '🐢', name: '小海龜殼' },
+      { id: 't7', icon: '🐬', name: '海豚之笛' },
+      { id: 't8', icon: '👑', name: '海王皇冠' },
+      { id: 't9', icon: '🪨', name: '彩虹海玉' },
+      { id: 't10', icon: '⚓', name: '純銀船錨' },
+      { id: 't11', icon: '🐠', name: '小丑魚紋' },
+      { id: 't12', icon: '🎐', name: '風鈴海貝' },
+      { id: 't13', icon: '🪶', name: '海鷗羽毛' },
+      { id: 't14', icon: '🧭', name: '冒險羅盤' },
+      { id: 't15', icon: '🗺️', name: '神秘海圖' },
+      { id: 't16', icon: '🔭', name: '遠航望遠鏡' },
+      { id: 't17', icon: '📜', name: '古老瓶中信' },
+      { id: 't18', icon: '🌊', name: '海之淚水滴' },
+      { id: 't19', icon: '🔱', name: '三叉波浪戟' },
+      { id: 't20', icon: '🌟', name: '許願晨星' },
+      { id: 't21', icon: '🛶', name: '迷你帆船' },
+      { id: 't22', icon: '🐡', name: '河豚氣球' },
+      { id: 't23', icon: '🪲', name: '琥珀綠寶' },
+      { id: 't24', icon: '🪄', name: '海洋魔法棒' },
+      { id: 't25', icon: '🏵️', name: '滿星金勳章' },
+      { id: 't26', icon: '🏆', name: '景美筆順金盃' }
+    ];
+
+    // 島嶼定義與錨定船隻座標
+    const ISLANDS_MAP = {
+      'digits-a': {
+        title: '數字島 A (0–5)',
+        desc: '認識與書寫 0 到 5',
+        keys: ['0', '1', '2', '3', '4', '5'],
+        type: 'digit',
+        boatPos: [270, 170],
+        boatPosMobile: [290, 120]
+      },
+      'digits-b': {
+        title: '數字島 B (6–10)',
+        desc: '認識與書寫 6 到 10',
+        keys: ['6', '7', '8', '9', '10'],
+        type: 'digit',
+        boatPos: [570, 140],
+        boatPosMobile: [130, 350]
+      },
+      'hanzi-a': {
+        title: '國字島 A (一～五)',
+        desc: '教育部標準筆順 一～五',
+        keys: ['一', '二', '三', '四', '五'],
+        type: 'hanzi',
+        boatPos: [300, 380],
+        boatPosMobile: [290, 600]
+      },
+      'hanzi-b': {
+        title: '國字島 B (六～十)',
+        desc: '教育部標準筆順 六～十',
+        keys: ['六', '七', '八', '九', '十'],
+        type: 'hanzi',
+        boatPos: [610, 370],
+        boatPosMobile: [130, 840]
+      },
+      'solitaire': {
+        title: '接龍島 (共 5 關)',
+        desc: '數字接龍與數序大挑戰',
+        keys: ['接龍1', '接龍2', '接龍3', '接龍4', '接龍5'],
+        type: 'solitaire',
+        boatPos: [870, 270],
+        boatPosMobile: [290, 1060]
+      }
+    };
+
+    // 核心資料狀態
+    let appData = {
+      activeProfileId: 'p1',
+      profiles: [],
+      settings: {
+        threshold: 'loose',
+        soundEnabled: true,
+        speechEnabled: true,
+        teacherMode: false
+      },
+      progress: {}
+    };
+
+    let soundSynth = null;
+    let speechHelper = null;
+    let strokeCanvas = null;
+
+    let curGlyph = null;
+    let curStep = 1;
+    let traceRound = 0;
+    let curLevelId = null;
+    let curActiveIslandId = 'digits-a';
+
+    function loadAppData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.profiles)) {
+            appData = parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('localStorage 讀取失敗:', e);
+      }
+
+      // 如果尚未建立過小朋友檔案，彈出歡迎設定
+      if (!appData.profiles || appData.profiles.length === 0) {
+        document.getElementById('first-time-modal').classList.add('active');
+      } else {
+        ensureCurrentProgress();
+      }
+    }
+
+    function saveAppData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {}
+    }
+
+    function ensureCurrentProgress() {
+      const pid = appData.activeProfileId || 'p1';
+      if (!appData.progress[pid]) {
+        appData.progress[pid] = { stars: {}, errors: {}, dates: {}, treasures: [] };
+      }
+    }
+
+    function getCurProgress() {
+      ensureCurrentProgress();
+      return appData.progress[appData.activeProfileId];
+    }
+
+    // ==========================================
+    // 第一次登入設定
+    // ==========================================
+    let welcomeChosenAvatar = '🐢';
+
+    function selectWelcomeAvatar(el, avatar) {
+      document.querySelectorAll('#welcome-avatars .avatar-opt').forEach(a => a.classList.remove('selected'));
+      el.classList.add('selected');
+      welcomeChosenAvatar = avatar;
+    }
+
+    function completeWelcome(isSkip) {
+      let name = document.getElementById('welcome-name-input').value.trim();
+      if (isSkip || !name) {
+        name = '小水手 1';
+      }
+      const newProf = {
+        id: 'p1',
+        name: name,
+        avatar: welcomeChosenAvatar
+      };
+      appData.profiles = [newProf];
+      appData.activeProfileId = 'p1';
+      ensureCurrentProgress();
+      saveAppData();
+
+      document.getElementById('first-time-modal').classList.remove('active');
+      updateHeaderBadges();
+      renderMap();
+    }
+
+    // ==========================================
+    // 視圖切換
+    // ==========================================
+    function showView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById(`${viewId}-view`);
+      if (target) target.classList.add('active');
+
+      if (viewId === 'map') {
+        renderMap();
+      } else if (viewId === 'practice') {
+        setTimeout(() => { if (strokeCanvas) strokeCanvas.resize(); }, 50);
+      }
+    }
+
+    // ==========================================
+    // 海圖渲染與島嶼關卡展開
+    // ==========================================
+    function isLevelUnlocked(levelKey, prevKey) {
+      if (appData.settings.teacherMode) return true;
+      if (!prevKey) return true;
+      const prog = getCurProgress();
+      return (prog.stars[prevKey] && prog.stars[prevKey] > 0);
+    }
+
+    function renderMap() {
+      const prog = getCurProgress();
+      updateHeaderBadges();
+
+      let previousKey = null;
+
+      for (const [islandId, info] of Object.entries(ISLANDS_MAP)) {
+        let allStars = true;
+        info.keys.forEach(k => {
+          if ((prog.stars[k] || 0) < 3) allStars = false;
+          previousKey = k;
+        });
+
+        // 滿星旗幟顯示（同步更新桌面與手機版）
+        document.querySelectorAll(`[data-flag="${islandId}"]`).forEach(el => {
+          el.style.display = allStars ? 'inline' : 'none';
+        });
+      }
+
+      // 移動小帆船到當前進行的島旁邊（桌面與手機同步）
+      const bInfo = ISLANDS_MAP[curActiveIslandId];
+      const boatPosDesk = bInfo?.boatPos || [270, 170];
+      const boatPosMob = bInfo?.boatPosMobile || [250, 110];
+
+      const boatElDesk = document.getElementById('sailboat-group');
+      if (boatElDesk) boatElDesk.setAttribute('transform', `translate(${boatPosDesk[0]}, ${boatPosDesk[1]})`);
+
+      const boatElMob = document.getElementById('sailboat-mobile');
+      if (boatElMob) boatElMob.setAttribute('transform', `translate(${boatPosMob[0]}, ${boatPosMob[1]})`);
+
+      // 動態更新島名 HTML 標籤定位
+      positionIslandBadges();
+    }
+
+    /**
+     * 動態定位 HTML 島名標籤，並進行邊界檢測與自動避界
+     * 規格：
+     * 1. 海圖 SVG 外面包一個 position: relative 容器，島名用 HTML <div> 絕對定位疊在島下方
+     * 2. 島名寬度 width: max-content，white-space: nowrap，字級 18px，左右 padding 12px
+     * 3. 島名如果超出海圖左右邊界，就往內推回來（用 JS 量 getBoundingClientRect 後修正 left）
+     */
+    function positionIslandBadges() {
+      const container = document.querySelector('.chart-container');
+      if (!container) return;
+      const containerRect = container.getBoundingClientRect();
+      if (containerRect.width <= 0) return;
+
+      const isMobile = window.innerWidth <= 600;
+
+      const islands = [
+        { badgeId: 'badge-digits-a', svgId: isMobile ? 'svg-island-digits-a-mob' : 'svg-island-digits-a' },
+        { badgeId: 'badge-digits-b', svgId: isMobile ? 'svg-island-digits-b-mob' : 'svg-island-digits-b' },
+        { badgeId: 'badge-hanzi-a', svgId: isMobile ? 'svg-island-hanzi-a-mob' : 'svg-island-hanzi-a' },
+        { badgeId: 'badge-hanzi-b', svgId: isMobile ? 'svg-island-hanzi-b-mob' : 'svg-island-hanzi-b' },
+        { badgeId: 'badge-solitaire', svgId: isMobile ? 'svg-island-solitaire-mob' : 'svg-island-solitaire' }
+      ];
+
+      islands.forEach(item => {
+        const badge = document.getElementById(item.badgeId);
+        const island = document.getElementById(item.svgId);
+        if (!badge || !island) return;
+
+        const islandRect = island.getBoundingClientRect();
+        
+        // 垂直定位在島的下方（加上 container.scrollTop 確保捲動時跟隨島嶼）
+        const top = (islandRect.bottom - containerRect.top) + container.scrollTop + 4;
+        badge.style.top = `${top}px`;
+
+        // 水平居中對齊島嶼
+        const islandCenter = (islandRect.left + islandRect.right) / 2;
+        const badgeWidth = badge.offsetWidth;
+        let left = (islandCenter - containerRect.left) - (badgeWidth / 2);
+
+        // 邊界防超出：如果超出海圖左右邊界，往內推回來
+        const minLeft = 8;
+        const maxLeft = container.clientWidth - badgeWidth - 8;
+        if (left < minLeft) left = minLeft;
+        if (left > maxLeft) left = maxLeft;
+
+        badge.style.left = `${left}px`;
+      });
+    }
+
+    function openIslandModal(islandId) {
+      curActiveIslandId = islandId;
+      const info = ISLANDS_MAP[islandId];
+      if (!info) return;
+
+      document.getElementById('island-modal-title').innerHTML = `<span>🏝️</span><span>${info.title}</span>`;
+      document.getElementById('island-modal-desc').textContent = info.desc;
+
+      const grid = document.getElementById('island-modal-grid');
+      grid.innerHTML = '';
+      const prog = getCurProgress();
+
+      // 移動小帆船到點開的島嶼（桌面與手機同步）
+      const boatPosDesk = info.boatPos || [270, 170];
+      const boatPosMob = info.boatPosMobile || [250, 110];
+
+      const boatElDesk = document.getElementById('sailboat-group');
+      if (boatElDesk) boatElDesk.setAttribute('transform', `translate(${boatPosDesk[0]}, ${boatPosDesk[1]})`);
+
+      const boatElMob = document.getElementById('sailboat-mobile');
+      if (boatElMob) boatElMob.setAttribute('transform', `translate(${boatPosMob[0]}, ${boatPosMob[1]})`);
+
+      let prevKey = null;
+      // 找出此島之前的最後一個關卡 key
+      const islandKeysOrder = ['digits-a', 'digits-b', 'hanzi-a', 'hanzi-b', 'solitaire'];
+      const myIdx = islandKeysOrder.indexOf(islandId);
+      if (myIdx > 0) {
+        const prevIsland = ISLANDS_MAP[islandKeysOrder[myIdx - 1]];
+        prevKey = prevIsland.keys[prevIsland.keys.length - 1];
+      }
+
+      info.keys.forEach((key, idx) => {
+        const unlocked = isLevelUnlocked(key, prevKey);
+        const stars = prog.stars[key] || 0;
+
+        const box = document.createElement('div');
+        box.className = `level-box ${unlocked ? '' : 'locked'}`;
+
+        if (unlocked) {
+          let starStr = '';
+          for (let s = 0; s < 3; s++) starStr += (s < stars) ? '★' : '☆';
+          box.innerHTML = `
+            <div class="level-char">${info.type === 'solitaire' ? (idx + 1) : key}</div>
+            <div class="level-stars">${starStr}</div>
+          `;
+          box.onclick = () => {
+            closeIslandModal();
+            if (info.type === 'solitaire') {
+              startSolitaireLevel(idx + 1);
+            } else {
+              startPracticeLevel(key, info.type);
+            }
+          };
+        } else {
+          box.innerHTML = `<div style="font-size:28px;">🔒</div>`;
+        }
+
+        grid.appendChild(box);
+        prevKey = key;
+      });
+
+      document.getElementById('island-modal').classList.add('active');
+    }
+
+    function closeIslandModal() {
+      document.getElementById('island-modal').classList.remove('active');
+    }
+
+    function updateHeaderBadges() {
+      const pid = appData.activeProfileId || 'p1';
+      const prof = appData.profiles.find(p => p.id === pid) || appData.profiles[0] || { name: '小水手 1', avatar: '🐢' };
+      document.getElementById('cur-avatar-icon').textContent = prof.avatar;
+      document.getElementById('cur-player-name').textContent = prof.name;
+
+      const prog = getCurProgress();
+      document.getElementById('treasure-count-badge').textContent = (prog.treasures || []).length;
+      document.getElementById('teacher-badge-tag').style.display = appData.settings.teacherMode ? 'inline-block' : 'none';
+    }
+
+    // ==========================================
+    // 單字練習流程（看、讀、描、寫）
+    // ==========================================
+    function startPracticeLevel(charKey, type) {
+      curLevelId = charKey;
+      curGlyph = (type === 'digit') ? window.GLYPHS_DIGITS[charKey] : window.GLYPHS_HANZI[charKey];
+
+      document.getElementById('practice-title-char').textContent = curGlyph.character;
+      updateStarsDisplay();
+
+      showView('practice');
+      curStep = 1;
+      traceRound = 0;
+      setupStepView(1);
+    }
+
+    function updateStarsDisplay() {
+      const prog = getCurProgress();
+      const stars = prog.stars[curLevelId] || 0;
+      let starStr = '';
+      for (let i = 0; i < 3; i++) starStr += (i < stars) ? '⭐' : '☆';
+      document.getElementById('practice-stars-display').textContent = starStr;
+    }
+
+    function setupStepView(step) {
+      curStep = step;
+
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step-tag-${i}`);
+        el.className = 'step-item';
+        if (i < step) el.classList.add('done');
+        else if (i === step) el.classList.add('active');
+      }
+
+      document.getElementById('step-tag-3').textContent = `3. 描 (${Math.min(2, traceRound)}/2)`;
+      document.getElementById('step-tag-4').textContent = `4. 寫 (${step === 4 ? 0 : 0}/1)`;
+
+      const readCard = document.getElementById('read-count-card');
+      const demoBtns = document.getElementById('demo-buttons-group');
+      const teacherNextBtn = document.getElementById('btn-teacher-next-stroke');
+      const nextStepBtn = document.getElementById('btn-next-step');
+      const guideText = document.getElementById('guide-turtle-text');
+      const strokeInfo = document.getElementById('current-stroke-info');
+
+      readCard.style.display = (step === 2) ? 'flex' : 'none';
+      teacherNextBtn.style.display = (step === 1 && appData.settings.teacherMode) ? 'inline-flex' : 'none';
+
+      if (step === 1) {
+        demoBtns.style.display = 'flex';
+        nextStepBtn.style.display = 'inline-flex';
+        nextStepBtn.textContent = '看懂了，下一步 ➔';
+        guideText.textContent = '小海龜示範筆順給你看喔！觀察編號和箭頭。';
+        strokeInfo.textContent = curGlyph.description;
+        strokeCanvas.setGlyph(curGlyph, true, false);
+        strokeCanvas.setShowDemoGuides(true);
+        replayDemo(1.0);
+      } else if (step === 2) {
+        strokeCanvas.setShowDemoGuides(false);
+        demoBtns.style.display = 'none';
+        nextStepBtn.style.display = 'none';
+        setupReadAndCountCard();
+      } else if (step === 3) {
+        strokeCanvas.setShowDemoGuides(false);
+        demoBtns.style.display = 'flex';
+        nextStepBtn.style.display = 'none';
+        guideText.textContent = `沿著平滑中線描描看！（第 ${traceRound + 1}/2 次）`;
+        strokeInfo.textContent = `順著綠點開始寫`;
+        strokeCanvas.setGlyph(curGlyph, true, false);
+      } else if (step === 4) {
+        strokeCanvas.setShowDemoGuides(false);
+        demoBtns.style.display = 'none';
+        nextStepBtn.style.display = 'none';
+        guideText.textContent = '不看提示，自己寫寫看！從綠點開始。';
+        strokeInfo.textContent = '從綠點開始，挑戰寫對！';
+        strokeCanvas.setGlyph(curGlyph, false, true);
+      }
+    }
+
+    function setupReadAndCountCard() {
+      const isDigit = (curGlyph.type === 'digit');
+      document.getElementById('read-primary-char').textContent = curGlyph.character;
+      document.getElementById('read-counterpart-char').textContent = isDigit ? (curGlyph.counterpart + ' ' + (curGlyph.counterpartBpmf || '')) : curGlyph.counterpart;
+
+      const dotsContainer = document.getElementById('dots-container');
+      dotsContainer.innerHTML = '';
+      const count = curGlyph.dotsCount;
+
+      if (count === 0) {
+        dotsContainer.innerHTML = '<div class="empty-plate-icon">🍽️</div><div style="font-size:20px; color:#64748b; font-weight:bold;">空盤子（代表 0）</div>';
+      } else {
+        for (let i = 0; i < count; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'count-dot';
+          dotsContainer.appendChild(dot);
+        }
+      }
+      speakCurrentChar();
+    }
+
+    function speakCurrentChar() {
+      if (!appData.settings.speechEnabled) return;
+      speechHelper.speak(`${curGlyph.character}，${curGlyph.counterpart}，共 ${curGlyph.dotsCount} 個。`);
+    }
+
+    function replayDemo(speed = 1.0) {
+      if (strokeCanvas) strokeCanvas.playDemo(speed);
+    }
+
+    function teacherStepStroke() {
+      if (strokeCanvas && strokeCanvas.session) {
+        const curIdx = strokeCanvas.session.currentStrokeIndex;
+        strokeCanvas.playDemoSingleStroke(curIdx, () => {
+          strokeCanvas.session.currentStrokeIndex++;
+          strokeCanvas.draw();
+        });
+      }
+    }
+
+    function onNextStepClicked() {
+      if (curStep === 1) advanceStep(2);
+      else if (curStep === 2) advanceStep(3);
+    }
+
+    function advanceStep(nextStep) {
+      setupStepView(nextStep);
+    }
+
+    function onStrokeSuccessHandler(evalResult, stroke) {
+      document.getElementById('guide-turtle-text').textContent = '太棒了！寫得很漂亮！';
+      document.getElementById('current-stroke-info').textContent = `寫對了：${stroke.name}`;
+    }
+
+    function onStrokeErrorHandler(evalResult, stroke) {
+      document.getElementById('guide-turtle-text').textContent = evalResult.message;
+      document.getElementById('current-stroke-info').textContent = `注意起點與方向喔`;
+
+      const prog = getCurProgress();
+      if (!prog.errors[curLevelId]) prog.errors[curLevelId] = {};
+      const sKey = `第${evalResult.strokeIndex + 1}筆 (${stroke.name})`;
+      prog.errors[curLevelId][sKey] = (prog.errors[curLevelId][sKey] || 0) + 1;
+      saveAppData();
+    }
+
+    function onSessionCompleteHandler(session) {
+      const prog = getCurProgress();
+      const todayStr = new Date().toISOString().split('T')[0];
+      prog.dates[curLevelId] = todayStr;
+
+      if (curStep === 3) {
+        traceRound++;
+        if (traceRound < 2) {
+          document.getElementById('guide-turtle-text').textContent = '很棒！再描一次加深記憶！';
+          setTimeout(() => setupStepView(3), 800);
+        } else {
+          const oldStars = prog.stars[curLevelId] || 0;
+          prog.stars[curLevelId] = Math.max(oldStars, 2);
+          awardTreasureForLevel(curLevelId);
+          saveAppData();
+          updateStarsDisplay();
+          soundSynth.playStarEarned();
+
+          document.getElementById('guide-turtle-text').textContent = '🌟 獲得 2 顆星！接著挑戰自己寫！';
+          setTimeout(() => advanceStep(4), 1200);
+        }
+      } else if (curStep === 4) {
+        prog.stars[curLevelId] = 3;
+        awardTreasureForLevel(curLevelId);
+        saveAppData();
+        updateStarsDisplay();
+        soundSynth.playLevelComplete();
+
+        document.getElementById('guide-turtle-text').textContent = '🎉 太厲害了！滿星過關！';
+        setTimeout(() => showView('map'), 1600);
+      }
+    }
+
+    function awardTreasureForLevel(levelId) {
+      const prog = getCurProgress();
+      if (!prog.treasures) prog.treasures = [];
+      const keys = ['0','1','2','3','4','5','6','7','8','9','10','一','二','三','四','五','六','七','八','九','十','接龍1','接龍2','接龍3','接龍4','接龍5'];
+      const idx = keys.indexOf(levelId);
+      if (idx >= 0 && idx < TREASURES_DEF.length) {
+        const tId = TREASURES_DEF[idx].id;
+        if (!prog.treasures.includes(tId)) prog.treasures.push(tId);
+      }
+      saveAppData();
+    }
+
+    function restartLevel() {
+      traceRound = 0;
+      setupStepView(1);
+    }
+
+    // ==========================================
+    // 數字接龍
+    // ==========================================
+    let curSolitaireLevel = 1;
+    let curSolQuestions = [];
+    let curSolQIndex = 0;
+    let curSelectedBlankIndex = null;
+    let solLevelErrors = 0;
+
+    function startSolitaireLevel(levelNum) {
+      curSolitaireLevel = levelNum;
+      curSolQuestions = StrokeEngine.SolitaireGenerator.getLevelQuestions(levelNum);
+      curSolQIndex = 0;
+      solLevelErrors = 0;
+      showView('solitaire');
+      renderSolitaireQuestion();
+    }
+
+    function renderSolitaireQuestion() {
+      const q = curSolQuestions[curSolQIndex];
+      document.getElementById('sol-level-num').textContent = curSolitaireLevel;
+      document.getElementById('sol-q-idx').textContent = curSolQIndex + 1;
+
+      const prog = getCurProgress();
+      document.getElementById('sol-stars-count').textContent = prog.stars[`接龍${curSolitaireLevel}`] || 0;
+
+      const row = document.getElementById('sol-question-row');
+      row.innerHTML = '';
+      curSelectedBlankIndex = null;
+      document.getElementById('sol-number-line').style.display = 'none';
+
+      let firstBlank = null;
+
+      q.sequence.forEach((val, idx) => {
+        const isBlank = (val === null);
+        const cell = document.createElement('div');
+        cell.className = `sol-cell ${isBlank ? 'blank' : 'filled'}`;
+        cell.id = `sol-cell-${idx}`;
+        cell.textContent = isBlank ? '' : val;
+
+        if (isBlank) {
+          if (firstBlank === null) firstBlank = idx;
+          cell.onclick = () => selectBlankCell(idx);
+        }
+        row.appendChild(cell);
+
+        if (idx < q.sequence.length - 1) {
+          const arrow = document.createElement('div');
+          arrow.className = 'sol-arrow';
+          arrow.textContent = '➔';
+          row.appendChild(arrow);
+        }
+      });
+
+      if (firstBlank !== null) selectBlankCell(firstBlank);
+    }
+
+    function selectBlankCell(idx) {
+      curSelectedBlankIndex = idx;
+      document.querySelectorAll('.sol-cell.blank').forEach(c => c.classList.remove('selected'));
+      const target = document.getElementById(`sol-cell-${idx}`);
+      if (target) target.classList.add('selected');
+    }
+
+    function onKeypadInput(num) {
+      if (curSelectedBlankIndex === null) return;
+      const q = curSolQuestions[curSolQIndex];
+      const correctVal = q.fullSequence[curSelectedBlankIndex];
+      const cell = document.getElementById(`sol-cell-${curSelectedBlankIndex}`);
+
+      if (num === correctVal) {
+        soundSynth.playStrokeSuccess();
+        cell.textContent = num;
+        cell.classList.remove('blank', 'selected', 'wrong-shake');
+        cell.classList.add('filled');
+        cell.onclick = null;
+        q.sequence[curSelectedBlankIndex] = num;
+
+        let nextBlank = null;
+        for (let i = 0; i < q.sequence.length; i++) {
+          if (q.sequence[i] === null) { nextBlank = i; break; }
+        }
+
+        if (nextBlank !== null) {
+          selectBlankCell(nextBlank);
+        } else {
+          document.getElementById('sol-hint-text').textContent = '🎉 答對了！太厲害了！';
+          soundSynth.playStarEarned();
+          setTimeout(() => {
+            curSolQIndex++;
+            if (curSolQIndex < curSolQuestions.length) {
+              document.getElementById('sol-hint-text').textContent = '點一下橘色空格，再點下方數字填入喔！';
+              renderSolitaireQuestion();
+            } else {
+              onSolitaireLevelCleared();
+            }
+          }, 1000);
+        }
+      } else {
+        solLevelErrors++;
+        soundSynth.playGentleHint();
+        cell.classList.add('wrong-shake');
+        setTimeout(() => cell.classList.remove('wrong-shake'), 400);
+
+        showNumberLineHint(correctVal);
+      }
+    }
+
+    function clearCurrentBlank() {
+      if (curSelectedBlankIndex === null) return;
+      const cell = document.getElementById(`sol-cell-${curSelectedBlankIndex}`);
+      if (cell) cell.textContent = '';
+    }
+
+    function showNumberLineHint(correctVal) {
+      const line = document.getElementById('sol-number-line');
+      line.style.display = 'flex';
+      line.innerHTML = '';
+      const minV = Math.max(0, correctVal - 2);
+      const maxV = Math.min(10, correctVal + 2);
+
+      document.getElementById('sol-hint-text').textContent = `再試一次！找找看 ${Math.max(0, correctVal - 1)} 和 ${Math.min(10, correctVal + 1)} 中間是誰？`;
+
+      for (let i = minV; i <= maxV; i++) {
+        const node = document.createElement('div');
+        node.className = `num-line-node ${i === correctVal ? 'highlight' : ''}`;
+        node.textContent = i;
+        line.appendChild(node);
+      }
+    }
+
+    function onSolitaireLevelCleared() {
+      const prog = getCurProgress();
+      const key = `接龍${curSolitaireLevel}`;
+      const starsEarned = (solLevelErrors === 0) ? 3 : (solLevelErrors <= 2 ? 2 : 1);
+      const oldStars = prog.stars[key] || 0;
+      prog.stars[key] = Math.max(oldStars, starsEarned);
+      awardTreasureForLevel(key);
+      saveAppData();
+      soundSynth.playLevelComplete();
+
+      alert(`🎉 恭喜通過接龍島第 ${curSolitaireLevel} 關！獲得 ${starsEarned} 顆星！`);
+      showView('map');
+    }
+
+    // ==========================================
+    // 齒輪長按機制（按住 > 0.5 秒顯示進度圈，達 2 秒觸發）
+    // ==========================================
+    let gearHoldTimer = null;
+    let gearShowTimer = null;
+    const gearBtn = document.getElementById('gear-btn');
+    const gearRing = document.getElementById('gear-progress-ring');
+    const gearCircle = document.getElementById('gear-progress-circle');
+
+    function startGearPress(e) {
+      e.preventDefault();
+      resetGearPress();
+
+      // 超過 0.5 秒才顯示進度圈
+      gearShowTimer = setTimeout(() => {
+        gearRing.classList.add('visible');
+        gearCircle.style.transition = 'stroke-dashoffset 1.5s linear';
+        gearCircle.style.strokeDashoffset = '0';
+      }, 500);
+
+      // 總長按 2 秒進入家長專區
+      gearHoldTimer = setTimeout(() => {
+        openParentModal();
+        resetGearPress();
+      }, 2000);
+    }
+
+    function resetGearPress() {
+      if (gearShowTimer) { clearTimeout(gearShowTimer); gearShowTimer = null; }
+      if (gearHoldTimer) { clearTimeout(gearHoldTimer); gearHoldTimer = null; }
+      gearRing.classList.remove('visible');
+      gearCircle.style.transition = 'none';
+      gearCircle.style.strokeDashoffset = '170';
+    }
+
+    gearBtn.addEventListener('mousedown', startGearPress);
+    gearBtn.addEventListener('mouseup', resetGearPress);
+    gearBtn.addEventListener('mouseleave', resetGearPress);
+    gearBtn.addEventListener('touchstart', startGearPress, { passive: false });
+    gearBtn.addEventListener('touchend', resetGearPress);
+    gearBtn.addEventListener('touchcancel', resetGearPress);
+
+    function openParentModal() {
+      document.getElementById('parent-modal').classList.add('active');
+      renderProfilesGrid();
+      renderReportTable();
+      renderSettingsState();
+    }
+
+    function closeParentModal() {
+      document.getElementById('parent-modal').classList.remove('active');
+      renderMap();
+    }
+
+    function renderProfilesGrid() {
+      const grid = document.getElementById('profiles-grid');
+      grid.innerHTML = '';
+
+      appData.profiles.forEach(p => {
+        const item = document.createElement('div');
+        item.style.padding = '8px 14px';
+        item.style.border = (p.id === appData.activeProfileId) ? '2.5px solid #0284c7' : '1.5px solid #cbd5e1';
+        item.style.background = (p.id === appData.activeProfileId) ? '#e0f2fe' : '#ffffff';
+        item.style.borderRadius = '14px';
+        item.style.cursor = 'pointer';
+        item.style.fontSize = '18px';
+        item.style.fontWeight = 'bold';
+        item.innerHTML = `${p.avatar} ${p.name}`;
+        item.onclick = () => {
+          appData.activeProfileId = p.id;
+          saveAppData();
+          renderProfilesGrid();
+          renderReportTable();
+          updateHeaderBadges();
+        };
+        grid.appendChild(item);
+      });
+    }
+
+    function renderReportTable() {
+      const prog = getCurProgress();
+      const tbody = document.getElementById('report-table-body');
+      tbody.innerHTML = '';
+
+      const allKeys = [
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+        '一', '二', '三', '四', '五', '六', '七', '八', '九', '十',
+        '接龍1', '接龍2', '接龍3', '接龍4', '接龍5'
+      ];
+
+      let totalStars = 0;
+      let practicedCount = 0;
+
+      allKeys.forEach(k => {
+        const stars = prog.stars[k] || 0;
+        if (stars > 0) practicedCount++;
+        totalStars += stars;
+
+        const errObj = prog.errors[k] || {};
+        let mostErrorStroke = '無';
+        let maxErr = 0;
+        for (const [sName, cnt] of Object.entries(errObj)) {
+          if (cnt > maxErr) {
+            maxErr = cnt;
+            mostErrorStroke = `${sName} (${cnt}次)`;
+          }
+        }
+
+        const dateStr = prog.dates[k] || '尚未練習';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${k}</strong></td>
+          <td>${'⭐'.repeat(stars) || '0 顆'}</td>
+          <td style="color:${maxErr > 0 ? '#ef4444' : '#64748b'};">${mostErrorStroke}</td>
+          <td>${dateStr}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('report-summary-text').textContent =
+        `累積獲得：${totalStars} 顆星（已過關：${practicedCount}/${allKeys.length} 關）`;
+    }
+
+    function renderSettingsState() {
+      const s = appData.settings;
+      document.getElementById('btn-thresh-loose').className = `switch-btn ${s.threshold === 'loose' ? 'active' : ''}`;
+      document.getElementById('btn-thresh-standard').className = `switch-btn ${s.threshold === 'standard' ? 'active' : ''}`;
+
+      const soundBtn = document.getElementById('btn-toggle-sound');
+      soundBtn.textContent = s.soundEnabled ? '開啟' : '關閉';
+      soundBtn.className = `switch-btn ${s.soundEnabled ? 'active' : ''}`;
+
+      const speechBtn = document.getElementById('btn-toggle-speech');
+      speechBtn.textContent = s.speechEnabled ? '開啟' : '關閉';
+      speechBtn.className = `switch-btn ${s.speechEnabled ? 'active' : ''}`;
+
+      const teacherBtn = document.getElementById('btn-toggle-teacher');
+      teacherBtn.textContent = s.teacherMode ? '已開啟' : '關閉';
+      teacherBtn.className = `switch-btn ${s.teacherMode ? 'active' : ''}`;
+    }
+
+    function setThresholdMode(mode) {
+      appData.settings.threshold = mode;
+      if (strokeCanvas) strokeCanvas.setMode(mode);
+      saveAppData();
+      renderSettingsState();
+    }
+
+    function toggleSound() {
+      appData.settings.soundEnabled = !appData.settings.soundEnabled;
+      soundSynth.enabled = appData.settings.soundEnabled;
+      saveAppData();
+      renderSettingsState();
+    }
+
+    function toggleSpeech() {
+      appData.settings.speechEnabled = !appData.settings.speechEnabled;
+      speechHelper.enabled = appData.settings.speechEnabled;
+      saveAppData();
+      renderSettingsState();
+    }
+
+    function toggleTeacherMode() {
+      appData.settings.teacherMode = !appData.settings.teacherMode;
+      saveAppData();
+      renderSettingsState();
+      updateHeaderBadges();
+      renderMap();
+    }
+
+    function exportDataJSON() {
+      const jsonStr = JSON.stringify(appData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `jingmei_strokes_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && Array.isArray(parsed.profiles)) {
+            appData = parsed;
+            saveAppData();
+            renderProfilesGrid();
+            renderReportTable();
+            renderSettingsState();
+            updateHeaderBadges();
+            renderMap();
+            alert('匯入備份成功！');
+          }
+        } catch (err) {
+          alert('讀取 JSON 發生錯誤：' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function openTreasureModal() {
+      document.getElementById('treasure-modal').classList.add('active');
+      const grid = document.getElementById('treasures-grid');
+      grid.innerHTML = '';
+      const prog = getCurProgress();
+      const unlockedIds = prog.treasures || [];
+
+      TREASURES_DEF.forEach(t => {
+        const isUnlocked = unlockedIds.includes(t.id);
+        const item = document.createElement('div');
+        item.className = `treasure-item ${isUnlocked ? 'unlocked' : ''}`;
+        item.innerHTML = `
+          <div class="treasure-icon">${t.icon}</div>
+          <div class="treasure-name">${isUnlocked ? t.name : '神秘寶物'}</div>
+        `;
+        grid.appendChild(item);
+      });
+    }
+
+    function closeTreasureModal() {
+      document.getElementById('treasure-modal').classList.remove('active');
+    }
+
+    // ==========================================
+    // 程式主進入點
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAppData();
+
+      soundSynth = new StrokeEngine.SoundSynthesizer();
+      soundSynth.enabled = appData.settings.soundEnabled;
+
+      speechHelper = new StrokeEngine.SpeechAssistant();
+      speechHelper.enabled = appData.settings.speechEnabled;
+
+      if (!speechHelper.supported) {
+        const spkBtn = document.getElementById('btn-read-speech');
+        if (spkBtn) spkBtn.style.display = 'none';
+      }
+
+      const canvasEl = document.getElementById('stroke-canvas');
+      strokeCanvas = new StrokeEngine.StrokeCanvas(canvasEl, {
+        gridType: 'tian',
+        mode: appData.settings.threshold,
+        sound: soundSynth,
+        speech: speechHelper,
+        onStrokeSuccess: onStrokeSuccessHandler,
+        onStrokeError: onStrokeErrorHandler,
+        onSessionComplete: onSessionCompleteHandler
+      });
+
+      window.addEventListener('resize', () => {
+        if (strokeCanvas) strokeCanvas.resize();
+        positionIslandBadges();
+      });
+
+      renderMap();
+      setTimeout(positionIslandBadges, 60);
+    });
+
+    window.addEventListener('load', () => {
+      positionIslandBadges();
+      setTimeout(positionIslandBadges, 100);
+    });
+  </script>
+</body>
+</html>
